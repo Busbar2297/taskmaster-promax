@@ -24,7 +24,7 @@ export function parse(text,tag='master'){
   return tasks;
 }
 export function normalizeProjects(conf){
-  if(!Array.isArray(conf?.projects)||!conf.projects.length||conf.projects.length>30) throw Error('Configure 1–30 project roots.');
+  if(!Array.isArray(conf?.projects)||conf.projects.length>30) throw Error('Configure up to 30 project roots.');
   const seen=new Set();
   return conf.projects.map(p=>{
     const key=id(p?.id), name=label(p?.name,80);

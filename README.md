@@ -6,29 +6,41 @@ TaskMasterProMax is a fork of Task Master for developers who want AI-assisted pl
 
 ## Local task dashboard
 
+![TaskMasterProMax dashboard showing the sample portfolio, task statuses, and the Add project button](dashboard/screenshot.png)
+
 - **Project and progress views** group tasks by project or status. Search across task and subtask titles and filter for open or missing dependencies.
 - **Task details** surface subtasks, blockers, and evidence status.
 - **Recent activity** shows observed status changes as local task files are updated. Unavailable sources are marked stale so their last known state stays visible.
 
-Run the dashboard from the checkout with Node.js 22 or later. It has zero npm dependencies.
+### Set up your dashboard
+
+From the repository root, run the dashboard with Node.js 22 or later. No npm install is required.
+
+```bash
+node dashboard/server.mjs
+```
+
+1. Open the dashboard on the same computer at `http://127.0.0.1:8917/`.
+2. Select **Add project**, enter a display name, and paste the absolute path to the folder containing `.taskmaster`.
+3. Keep the **master** task tag or enter the tag your project uses, then select **Add project** to save.
+
+The project list persists in `.taskmaster-promax/portfolio.json` in your home directory. If you already use a portfolio JSON file, start the server with `--config <path>` to keep using it.
+
+### Try the sample projects
+
+Run the demo in place of the regular dashboard to explore three sample projects and watch a blocker clear.
 
 ```bash
 node dashboard/demo.mjs --simulate
 ```
 
-Open [the local dashboard](http://127.0.0.1:8917/) to explore three sample projects and watch a blocker clear. To monitor existing projects, point the dashboard at a local allowlist.
-
-```bash
-node dashboard/server.mjs --config /path/to/portfolio.json
-```
-
-See the [dashboard guide](dashboard/README.md) for the configuration format, Windows examples, and tests.
+See the [dashboard guide](dashboard/README.md) for setup, local storage, and tests.
 
 ## Privacy and data flow
 
 - **Cloud telemetry removed.** This fork removes the upstream Sentry integration and its instrumentation for MCP and AI requests.
 - **Local task storage by default.** Task Master cloud storage requires an explicit launcher opt-in with `TASKMASTER_ENABLE_CLOUD=1`. The CLI's automatic update check and installation path were removed to keep it from automatically switching back to an upstream release.
-- **Read-only dashboard.** The dashboard listens on loopback, reads allowlisted task files, and serves its assets locally. Its activity history lives in memory for the current session.
+- **Local dashboard.** The dashboard listens on loopback, saves its project list locally, and reads task files without editing them. Its activity history lives in memory for the current session.
 - **AI calls follow your provider configuration.** AI-powered commands can send prompts and task context to the selected external provider. Local-model workflows require a compatible local provider.
 
 ## Build the CLI and MCP server

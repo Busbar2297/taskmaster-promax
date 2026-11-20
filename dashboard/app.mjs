@@ -7,6 +7,42 @@ const time=t=>t?new Date(t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digi
 let last='', current={projects:[],activity:[]}, selected=null, theme='dark';
 const trigger=$('#theme');
 const detail=$('#detail');
+const projectDialog=$('#project-dialog');
+const projectForm=$('#project-form');
+const projectSubmit=projectForm.querySelector('button[type="submit"]');
+const projectCancel=$('#cancel-project');
+const projectError=$('#project-error');
+$('#add-project').addEventListener('click',()=>{
+ projectError.textContent='';
+ projectDialog.showModal();
+});
+projectCancel.addEventListener('click',()=>projectDialog.close());
+projectDialog.addEventListener('cancel',event=>{
+ if(projectSubmit.disabled)event.preventDefault();
+});
+projectForm.addEventListener('submit',async event=>{
+ event.preventDefault();
+ if(projectSubmit.disabled)return;
+ const project=Object.fromEntries(new FormData(projectForm));
+ project.tag=project.tag.trim();
+ projectError.textContent='';
+ projectSubmit.disabled=projectCancel.disabled=true;
+ projectSubmit.textContent='Adding…';
+ try{
+  const response=await fetch('/api/projects',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(project)});
+  const result=await response.json();
+  if(!response.ok){projectError.textContent=result.error;return;}
+  projectDialog.close();
+  projectForm.reset();
+  $('#find').value=$('#filter').value='';
+  $('#group').value='project';
+  $('#project-status').textContent=project.name.trim()+' added.';
+ }catch{projectError.textContent='Could not reach the dashboard. Try again.';}
+ finally{
+  projectSubmit.disabled=projectCancel.disabled=false;
+  projectSubmit.textContent='Add project';
+ }
+});
 detail.addEventListener('close',()=>{
  const ref=selected&&selected.p+'/'+selected.t;
  const row=Array.from($('#portfolio').querySelectorAll('button[data-ref]')).find(button=>button.dataset.ref===ref);
@@ -72,7 +108,7 @@ function render(){
   list.append(...rows);group.append(head,list);box.append(group);
  }
  $('#shown').textContent=count+' '+(byProgress?(count===1?'task':'tasks'):(count===1?'project':'projects'))+' shown';
- if(!count)box.append(element('p','No projects or tasks match.','empty'));
+ if(!count)box.append(element('p',p.length?'No projects or tasks match.':'Add a local Task Master project to get started.','empty'));
  if(focused)for(const btn of box.querySelectorAll('button'))if(btn.dataset.ref===focused){btn.focus({preventScroll:true});break;}
  const a=$('#activity');a.replaceChildren();
  if(!current.activity.length)a.append(element('li','No changes observed since startup.','empty'));
